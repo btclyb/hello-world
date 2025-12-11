@@ -1,10 +1,15 @@
-name: "纯净分流规则-修复版"
-desc: "修复格式错误，移除锚点，纯正则分流"
+name: "Stash正则分流-修正版"
+desc: "使用filter字段进行正确筛选"
 maintainer: "User"
 
 # ---------------------------------------------------------
 # 1. 代理组 (Proxy Groups)
 # ---------------------------------------------------------
+# 核心修改：
+# 1. 移除了 proxies 列表里的正则乱码。
+# 2. 增加了 include-all: true (抓取所有订阅节点)。
+# 3. 增加了 filter: "..." (使用正则过滤节点)。
+
 proxy-groups:
   - name: 手动切换
     type: select
@@ -13,8 +18,10 @@ proxy-groups:
       - 自动选择
       - 故障转移
       - DIRECT
-      # 匹配所有节点 (排除官网、流量提醒等无效节点)
-      - '/^(?!.*(DIRECT|REJECT|官网|到期|剩余|流量|重置)).*$/'
+    # 【开启抓取】抓取订阅里的所有节点
+    include-all: true
+    # 【过滤规则】排除包含官网、到期、流量等字样的节点
+    filter: "^(?!.*(DIRECT|REJECT|官网|到期|剩余|流量|重置)).*$"
 
   - name: 自动选择
     type: url-test
@@ -22,18 +29,18 @@ proxy-groups:
     url: "http://cp.cloudflare.com/generate_204"
     interval: 300
     tolerance: 50
-    proxies:
-      # 匹配所有可用节点进行测速
-      - '/^(?!.*(DIRECT|REJECT|官网|到期|剩余|流量|重置)).*$/'
+    proxies: [] # 列表留空或保留默认，主要靠下面抓取
+    include-all: true
+    filter: "^(?!.*(DIRECT|REJECT|官网|到期|剩余|流量|重置)).*$"
 
   - name: 故障转移
     type: fallback
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Bypass.png
     url: 'http://cp.cloudflare.com/generate_204'
     interval: 300
-    proxies:
-      # 匹配所有可用节点，当前不可用时自动切下一个
-      - '/^(?!.*(DIRECT|REJECT|官网|到期|剩余|流量|重置)).*$/'
+    proxies: []
+    include-all: true
+    filter: "^(?!.*(DIRECT|REJECT|官网|到期|剩余|流量|重置)).*$"
 
   - name: 国外网站
     type: select
@@ -48,22 +55,24 @@ proxy-groups:
       - 台湾节点
       - DIRECT
 
-  # --- 地区分组 (纯正则匹配) ---
+  # --- 地区分组 ---
   - name: 香港节点
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Hong_Kong.png
     proxies:
       - 自动选择
-      # 自动抓取包含 HK、HongKong、香、港 的节点
-      - '/(?i)(HK|Hong|Kong|香|港)/'
+    include-all: true
+    # 筛选 HK, HongKong, 香, 港
+    filter: "(?i)(HK|Hong|Kong|香|港)"
 
   - name: 日本节点
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Japan.png
     proxies:
       - 自动选择
-      # 自动抓取包含 JP、Japan、日 的节点
-      - '/(?i)(JP|Japan|日)/'
+    include-all: true
+    # 筛选 JP, Japan, 日
+    filter: "(?i)(JP|Japan|日)"
 
   - name: 美国节点
     type: select
@@ -71,16 +80,18 @@ proxy-groups:
     proxies:
       - 自动选择
       - DIRECT
-      # 自动抓取包含 US、America、States、美 的节点
-      - '/(?i)(US|America|States|美)/'
+    include-all: true
+    # 筛选 US, America, States, 美
+    filter: "(?i)(US|America|States|美)"
 
   - name: 台湾节点
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Taiwan.png
     proxies:
       - 自动选择
-      # 自动抓取包含 TW、Tai、台 的节点
-      - '/(?i)(TW|Tai|台)/'
+    include-all: true
+    # 筛选 TW, Tai, 台
+    filter: "(?i)(TW|Tai|台)"
 
   # --- 应用分组 ---
   - name: YouTube
