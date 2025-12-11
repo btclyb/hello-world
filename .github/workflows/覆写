@@ -1,15 +1,16 @@
-name: "Stash正则分流-修正版"
-desc: "使用filter字段进行正确筛选"
+name: "Stash强制覆盖模式"
+desc: "强制替换原订阅的所有分组和规则"
 maintainer: "User"
+
+# ---------------------------------------------------------
+# 关键设置：强制覆盖原配置
+# ---------------------------------------------------------
+override-proxy-group: true  # 开启此项，原订阅的分组会被删除，只显示下面的
+override-rule: true         # 开启此项，原订阅的规则会被删除，只显示下面的
 
 # ---------------------------------------------------------
 # 1. 代理组 (Proxy Groups)
 # ---------------------------------------------------------
-# 核心修改：
-# 1. 移除了 proxies 列表里的正则乱码。
-# 2. 增加了 include-all: true (抓取所有订阅节点)。
-# 3. 增加了 filter: "..." (使用正则过滤节点)。
-
 proxy-groups:
   - name: 手动切换
     type: select
@@ -18,9 +19,7 @@ proxy-groups:
       - 自动选择
       - 故障转移
       - DIRECT
-    # 【开启抓取】抓取订阅里的所有节点
     include-all: true
-    # 【过滤规则】排除包含官网、到期、流量等字样的节点
     filter: "^(?!.*(DIRECT|REJECT|官网|到期|剩余|流量|重置)).*$"
 
   - name: 自动选择
@@ -29,7 +28,7 @@ proxy-groups:
     url: "http://cp.cloudflare.com/generate_204"
     interval: 300
     tolerance: 50
-    proxies: [] # 列表留空或保留默认，主要靠下面抓取
+    proxies: []
     include-all: true
     filter: "^(?!.*(DIRECT|REJECT|官网|到期|剩余|流量|重置)).*$"
 
@@ -62,7 +61,6 @@ proxy-groups:
     proxies:
       - 自动选择
     include-all: true
-    # 筛选 HK, HongKong, 香, 港
     filter: "(?i)(HK|Hong|Kong|香|港)"
 
   - name: 日本节点
@@ -71,7 +69,6 @@ proxy-groups:
     proxies:
       - 自动选择
     include-all: true
-    # 筛选 JP, Japan, 日
     filter: "(?i)(JP|Japan|日)"
 
   - name: 美国节点
@@ -81,7 +78,6 @@ proxy-groups:
       - 自动选择
       - DIRECT
     include-all: true
-    # 筛选 US, America, States, 美
     filter: "(?i)(US|America|States|美)"
 
   - name: 台湾节点
@@ -90,7 +86,6 @@ proxy-groups:
     proxies:
       - 自动选择
     include-all: true
-    # 筛选 TW, Tai, 台
     filter: "(?i)(TW|Tai|台)"
 
   # --- 应用分组 ---
