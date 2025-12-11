@@ -1,162 +1,147 @@
-name: "精简版配置覆写"
-desc: "移除内置节点，使用正则自动分组，保留原DNS与分流规则"
+/**
+ * Stash 脚本覆写：重组节点与分流
+ * 作用：清除原有分组，只保留新的正则分组
+ */
+function main(config) {
+  // 1. 备份订阅里原有的节点 (Proxies)
+  // 这是最重要的，不能丢
+  const originalProxies = config.proxies || [];
 
-# ---------------------------------------------------------
-# 1. DNS 设置 (保持不变)
-# ---------------------------------------------------------
-dns:
-  enable: true
-  ipv6: true
-  listen: 0.0.0.0:53
-  enhanced-mode: fake-ip
-  fake-ip-range: 198.18.0.1/16
-  default-nameserver:
-    - 223.5.5.5
-    - 119.29.29.29
-  fake-ip-filter:
-    - '*.lan'
-    - '*.local'
-  nameserver:
-    - https://doh.pub/dns-query
-    - https://dns.alidns.com/dns-query
-  fallback:
-    - https://1.1.1.1/dns-query
-    - https://8.8.8.8/dns-query
+  // 2. 定义新的策略组 (Proxy Groups)
+  // 这里直接完全重写，不保留原来的
+  const newGroups = [
+    {
+      name: "手动切换",
+      type: "select",
+      proxies: ["自动选择", "故障转移", "DIRECT"],
+      icon: "https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Rocket.png",
+      filter: ".*" // 抓取所有节点
+    },
+    {
+      name: "自动选择",
+      type: "url-test",
+      url: "http://cp.cloudflare.com/generate_204",
+      interval: 300,
+      tolerance: 50,
+      icon: "https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Auto.png",
+      filter: ".*"
+    },
+    {
+      name: "故障转移",
+      type: "fallback",
+      url: "http://cp.cloudflare.com/generate_204",
+      interval: 300,
+      icon: "https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Bypass.png",
+      filter: ".*"
+    },
+    {
+      name: "国外网站",
+      type: "select",
+      proxies: ["手动切换", "自动选择", "故障转移", "香港节点", "日本节点", "美国节点", "台湾节点", "DIRECT"],
+      icon: "https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Global.png"
+    },
+    // --- 地区分组 (正则) ---
+    {
+      name: "香港节点",
+      type: "select",
+      proxies: ["自动选择"],
+      icon: "https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Hong_Kong.png",
+      filter: "(?i)(港|HK|Hong)"
+    },
+    {
+      name: "日本节点",
+      type: "select",
+      proxies: ["自动选择"],
+      icon: "https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Japan.png",
+      filter: "(?i)(日|JP|Japan|Tokyo|Osaka)"
+    },
+    {
+      name: "美国节点",
+      type: "select",
+      proxies: ["自动选择"],
+      icon: "https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/United_States.png",
+      filter: "(?i)(美|US|States|American)"
+    },
+    {
+      name: "台湾节点",
+      type: "select",
+      proxies: ["自动选择"],
+      icon: "https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Taiwan.png",
+      filter: "(?i)(台|TW|Tai)"
+    },
+    // --- 应用分组 ---
+    {
+      name: "YouTube",
+      type: "select",
+      proxies: ["手动切换", "自动选择", "故障转移", "香港节点", "日本节点", "美国节点", "台湾节点", "DIRECT"], // 对应之前的 *G
+      icon: "https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/YouTube.png"
+    },
+    {
+      name: "NETFLIX",
+      type: "select",
+      proxies: ["手动切换", "自动选择", "故障转移", "香港节点", "日本节点", "美国节点", "台湾节点", "DIRECT"],
+      icon: "https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Netflix.png"
+    },
+    {
+      name: "漏网之鱼",
+      type: "select",
+      proxies: ["手动切换", "自动选择", "故障转移", "香港节点", "日本节点", "美国节点", "台湾节点", "DIRECT"],
+      icon: "https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Final.png"
+    }
+  ];
 
-# ---------------------------------------------------------
-# 2. 策略组 (Proxy Groups) - 已改为正则筛选
-# ---------------------------------------------------------
-proxy-groups:
-  - name: 手动切换
-    type: select
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Rocket.png
-    proxies:
-      - 自动选择
-      - 故障转移
-      - DIRECT
-    # 正则：匹配所有节点
-    filter: ".*"
+  // 3. 定义 Rule Providers (规则集)
+  const newRuleProviders = {
+    YouTube: {
+      type: "http",
+      behavior: "classical",
+      url: "https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/YouTube/YouTube.yaml",
+      path: "./ruleset/YouTube.yaml",
+      interval: 86400
+    },
+    Netflix: {
+      type: "http",
+      behavior: "classical",
+      url: "https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/Netflix/Netflix.yaml",
+      path: "./ruleset/Netflix.yaml",
+      interval: 86400
+    },
+    Global: {
+      type: "http",
+      behavior: "domain",
+      format: "text",
+      url: "https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/Global/Global_Domain.txt",
+      path: "./ruleset/Global-Domain.yaml",
+      interval: 86400
+    },
+    China: {
+      type: "http",
+      behavior: "domain",
+      format: "text",
+      url: "https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/China/China_Domain.txt",
+      path: "./ruleset/China.yaml",
+      interval: 86400
+    }
+  };
 
-  - name: 自动选择
-    type: url-test
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Auto.png
-    url: "http://cp.cloudflare.com/generate_204"
-    interval: 300
-    tolerance: 50
-    # 正则：匹配所有节点
-    filter: ".*"
+  // 4. 定义 Rules (分流规则)
+  const newRules = [
+    "RULE-SET,YouTube,YouTube",
+    "RULE-SET,Netflix,NETFLIX",
+    "RULE-SET,Global,国外网站",
+    "RULE-SET,China,DIRECT",
+    "GEOIP,CN,DIRECT,no-resolve",
+    "MATCH,漏网之鱼"
+  ];
 
-  - name: 故障转移
-    type: fallback
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Bypass.png
-    url: 'http://cp.cloudflare.com/generate_204'
-    interval: 300
-    # 正则：匹配所有节点
-    filter: ".*"
+  // 5. 应用修改
+  // 强制替换 proxy-groups，而不是合并
+  config['proxy-groups'] = newGroups;
+  config['rule-providers'] = newRuleProviders;
+  config['rules'] = newRules;
 
-  - name: 国外网站
-    type: select
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Global.png
-    proxies: &G
-      - 手动切换
-      - 自动选择
-      - 故障转移
-      - 香港节点
-      - 日本节点
-      - 美国节点
-      - 台湾节点
-      - DIRECT
+  // 确保 dns 配置存在 (这里简单保留原配置或覆盖，通常保留即可)
+  // config['dns'] = ... (如果需要也可以在这里写)
 
-  # --- 地区分组 (使用正则自动归类) ---
-  - name: 香港节点
-    type: select
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Hong_Kong.png
-    proxies:
-      - 自动选择
-    # 正则：匹配包含 港, HK, Hong 的节点 (不区分大小写)
-    filter: "(?i)(港|HK|Hong)"
-
-  - name: 日本节点
-    type: select
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Japan.png
-    proxies:
-      - 自动选择
-    # 正则：匹配包含 日, JP, Japan, Tokyo, Osaka 的节点
-    filter: "(?i)(日|JP|Japan|Tokyo|Osaka)"
-
-  - name: 美国节点
-    type: select
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/United_States.png
-    proxies:
-      - 自动选择
-    # 正则：匹配包含 美, US, States, American 的节点
-    filter: "(?i)(美|US|States|American)"
-
-  - name: 台湾节点
-    type: select
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Taiwan.png
-    proxies:
-      - 自动选择
-    # 正则：匹配包含 台, TW, Tai 的节点
-    filter: "(?i)(台|TW|Tai)"
-
-  # --- 应用分组 ---
-  - name: YouTube
-    type: select
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/YouTube.png
-    proxies: *G
-
-  - name: NETFLIX
-    type: select
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Netflix.png
-    proxies: *G
-       
-  - name: 漏网之鱼
-    type: select
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Final.png
-    proxies: *G
-
-# ---------------------------------------------------------
-# 3. 规则集 (Rule Providers) 
-# ---------------------------------------------------------
-rule-providers:
-  YouTube:
-    type: http
-    behavior: classical
-    url: "https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/YouTube/YouTube.yaml"
-    path: ./ruleset/YouTube.yaml
-    interval: 86400
-
-  Netflix:
-    type: http
-    behavior: classical
-    url: "https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/Netflix/Netflix.yaml"
-    path: ./ruleset/Netflix.yaml
-    interval: 86400
-
-  Global:
-    type: http
-    behavior: domain
-    format: text
-    url: "https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/Global/Global_Domain.txt"
-    path: ./ruleset/Global-Domain.yaml
-    interval: 86400
-
-  China:
-    type: http
-    behavior: domain
-    format: text
-    url: "https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/China/China_Domain.txt"
-    path: ./ruleset/China.yaml
-    interval: 86400
-
-# ---------------------------------------------------------
-# 4. 规则 (Rules)
-# ---------------------------------------------------------
-rules:
-  - RULE-SET,YouTube,YouTube
-  - RULE-SET,Netflix,NETFLIX
-  - RULE-SET,Global,国外网站
-  - RULE-SET,China,DIRECT
-  - GEOIP,CN,DIRECT,no-resolve
-  - MATCH,漏网之鱼
+  return config;
+}
