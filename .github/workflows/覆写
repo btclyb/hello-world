@@ -1,9 +1,8 @@
-name: "强制覆盖分组"
-desc: "清除原配置，使用正则自动分组"
+name: "Stash分组修复版"
+desc: "修复节点抓取问题，确保每个分组都能获取节点"
 
 # ---------------------------------------------------------
 # 1. 策略组 (Proxy Groups)
-# 注意：后面的 #!replace 是关键，它会强制替换掉订阅自带的分组
 # ---------------------------------------------------------
 proxy-groups: #!replace
   - name: 手动切换
@@ -13,7 +12,7 @@ proxy-groups: #!replace
       - 自动选择
       - 故障转移
       - DIRECT
-    # 正则：匹配所有节点
+    # 抓取所有节点
     filter: ".*"
 
   - name: 自动选择
@@ -22,7 +21,7 @@ proxy-groups: #!replace
     url: "http://cp.cloudflare.com/generate_204"
     interval: 300
     tolerance: 50
-    # 正则：匹配所有节点
+    # 抓取所有节点
     filter: ".*"
 
   - name: 故障转移
@@ -30,29 +29,16 @@ proxy-groups: #!replace
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Bypass.png
     url: 'http://cp.cloudflare.com/generate_204'
     interval: 300
-    # 正则：匹配所有节点
+    # 抓取所有节点
     filter: ".*"
 
-  - name: 国外网站
-    type: select
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Global.png
-    proxies: &G
-      - 手动切换
-      - 自动选择
-      - 故障转移
-      - 香港节点
-      - 日本节点
-      - 美国节点
-      - 台湾节点
-      - DIRECT
-
-  # --- 地区分组 (使用正则自动归类) ---
+  # --- 地区分组 (精准抓取) ---
   - name: 香港节点
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Hong_Kong.png
     proxies:
       - 自动选择
-    # 正则：匹配包含 港, HK, Hong 的节点 (不区分大小写)
+    # 抓取 HK, Hong, 港 (忽略大小写)
     filter: "(?i)(港|HK|Hong)"
 
   - name: 日本节点
@@ -60,7 +46,7 @@ proxy-groups: #!replace
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Japan.png
     proxies:
       - 自动选择
-    # 正则：匹配包含 日, JP, Japan, Tokyo, Osaka 的节点
+    # 抓取 JP, Japan, 日 (忽略大小写)
     filter: "(?i)(日|JP|Japan|Tokyo|Osaka)"
 
   - name: 美国节点
@@ -68,7 +54,7 @@ proxy-groups: #!replace
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/United_States.png
     proxies:
       - 自动选择
-    # 正则：匹配包含 美, US, States, American 的节点
+    # 抓取 US, America, 美 (忽略大小写)
     filter: "(?i)(美|US|States|American)"
 
   - name: 台湾节点
@@ -76,27 +62,63 @@ proxy-groups: #!replace
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Taiwan.png
     proxies:
       - 自动选择
-    # 正则：匹配包含 台, TW, Tai 的节点
+    # 抓取 TW, Taiwan, 台 (忽略大小写)
     filter: "(?i)(台|TW|Tai)"
 
-  # --- 应用分组 ---
+  # --- 场景分组 ---
+  # 关键修复：显式添加 filter: ".*"，否则不会抓取节点
+  - name: 国外网站
+    type: select
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Global.png
+    proxies:
+      - 手动切换
+      - 自动选择
+      - 香港节点
+      - 日本节点
+      - 美国节点
+      - 台湾节点
+      - DIRECT
+    filter: ".*"
+
   - name: YouTube
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/YouTube.png
-    proxies: *G
+    proxies:
+      - 手动切换
+      - 自动选择
+      - 香港节点
+      - 日本节点
+      - 美国节点
+      - 台湾节点
+    filter: ".*"
 
   - name: NETFLIX
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Netflix.png
-    proxies: *G
+    proxies:
+      - 手动切换
+      - 自动选择
+      - 香港节点
+      - 日本节点
+      - 美国节点
+      - 台湾节点
+    filter: ".*"
        
   - name: 漏网之鱼
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Final.png
-    proxies: *G
+    proxies:
+      - 手动切换
+      - 自动选择
+      - 香港节点
+      - 日本节点
+      - 美国节点
+      - 台湾节点
+      - DIRECT
+    filter: ".*"
 
 # ---------------------------------------------------------
-# 2. 规则集 (Rule Providers)
+# 2. 规则集 (保持不变)
 # ---------------------------------------------------------
 rule-providers: #!replace
   YouTube:
@@ -130,7 +152,7 @@ rule-providers: #!replace
     interval: 86400
 
 # ---------------------------------------------------------
-# 3. 规则 (Rules)
+# 3. 规则 (保持不变)
 # ---------------------------------------------------------
 rules: #!replace
   - RULE-SET,YouTube,YouTube
