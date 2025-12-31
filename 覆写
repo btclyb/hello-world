@@ -1,212 +1,22 @@
-name: "Stash Mixed Config"
-desc: "Converted for Stash with v2ray-plugin support"
+name: "Stash 规则分组优化"
+desc: "仅覆盖规则和策略组，自动抓取原有节点"
 
 # ---------------------------------------------------------
-# 1. 基础设置 & DNS (Stash 完美兼容 Fake-IP)
+# 1. 覆盖基础设置 (可选，不需要可删除)
 # ---------------------------------------------------------
-mixed-port: 7890
-allow-lan: true
-bind-address: '*'
-mode: rule
-log-level: info
-ipv6: true
-external-controller: 127.0.0.1:9090
-
 dns:
   enable: true
   ipv6: true
   listen: 0.0.0.0:53
   enhanced-mode: fake-ip
   fake-ip-range: 198.18.0.1/16
-  default-nameserver:
-    - 223.5.5.5
-    - 119.29.29.29
-  fake-ip-filter:
-    - '*.lan'
-    - '*.local'
-  nameserver:
-    - https://doh.pub/dns-query
-    - https://dns.alidns.com/dns-query
-  fallback:
-    - https://1.1.1.1/dns-query
-    - https://8.8.8.8/dns-query
+  default-nameserver: [223.5.5.5, 119.29.29.29]
+  nameserver: [https://doh.pub/dns-query, https://dns.alidns.com/dns-query]
+  fallback: [https://1.1.1.1/dns-query, https://8.8.8.8/dns-query]
 
 # ---------------------------------------------------------
-# 2. 代理节点 (保持 SS + v2ray-plugin 配置)
-# ---------------------------------------------------------
-proxies:
-  - name: SG-ss
-    type: ss
-    server: mfa.gov.ua
-    port: 443
-    cipher: none
-    password: c935bb27-c39a-4fce-9f3d-912215a948f7
-    plugin: v2ray-plugin
-    plugin-opts:
-      mode: websocket
-      host: jd.a.5.7.e.f.f.0.4.2.0.0.0.7.4.0.1.0.0.2.ip6.arpa
-      path: /c935bb27-c39a-4fce-9f3d-912215a948f7/?ed=2560
-      tls: true
-      peer: jd.a.5.7.e.f.f.0.4.2.0.0.0.7.4.0.1.0.0.2.ip6.arpa
-      mux: false
-      allowInsecure: true
-    client-fingerprint: chrome
-
-  - name: JP-ss
-    type: ss
-    server: saas.sin.fan
-    port: 443
-    cipher: none
-    password: c935bb27-c39a-4fce-9f3d-912215a948f7
-    plugin: v2ray-plugin
-    plugin-opts:
-      mode: websocket
-      host: jd.a.5.7.e.f.f.0.4.2.0.0.0.7.4.0.1.0.0.2.ip6.arpa
-      path: /c935bb27-c39a-4fce-9f3d-912215a948f7/?ed=2560
-      tls: true
-      peer: jd.a.5.7.e.f.f.0.4.2.0.0.0.7.4.0.1.0.0.2.ip6.arpa
-      mux: false
-      allowInsecure: true
-    client-fingerprint: chrome
-
-  - name: SG-ss 2
-    type: ss
-    server: store.ubi.com
-    port: 443
-    cipher: none
-    password: c935bb27-c39a-4fce-9f3d-912215a948f7
-    plugin: v2ray-plugin
-    plugin-opts:
-      mode: websocket
-      host: jd.a.5.7.e.f.f.0.4.2.0.0.0.7.4.0.1.0.0.2.ip6.arpa
-      path: /c935bb27-c39a-4fce-9f3d-912215a948f7/?ed=2560
-      tls: true
-      peer: jd.a.5.7.e.f.f.0.4.2.0.0.0.7.4.0.1.0.0.2.ip6.arpa
-      mux: false
-      allowInsecure: true
-    client-fingerprint: chrome
-
-  - name: KR-ss
-    type: ss
-    server: cf.130519.xyz
-    port: 443
-    cipher: none
-    password: c935bb27-c39a-4fce-9f3d-912215a948f7
-    plugin: v2ray-plugin
-    plugin-opts:
-      mode: websocket
-      host: jd.a.5.7.e.f.f.0.4.2.0.0.0.7.4.0.1.0.0.2.ip6.arpa
-      path: /c935bb27-c39a-4fce-9f3d-912215a948f7/?ed=2560
-      tls: true
-      peer: jd.a.5.7.e.f.f.0.4.2.0.0.0.7.4.0.1.0.0.2.ip6.arpa
-      mux: false
-      allowInsecure: true
-    client-fingerprint: chrome
-
-  - name: HK-ss
-    type: ss
-    server: cf.008500.xyz
-    port: 443
-    cipher: none
-    password: c935bb27-c39a-4fce-9f3d-912215a948f7
-    plugin: v2ray-plugin
-    plugin-opts:
-      mode: websocket
-      host: jd.a.5.7.e.f.f.0.4.2.0.0.0.7.4.0.1.0.0.2.ip6.arpa
-      path: /c935bb27-c39a-4fce-9f3d-912215a948f7/?ed=2560
-      tls: true
-      peer: jd.a.5.7.e.f.f.0.4.2.0.0.0.7.4.0.1.0.0.2.ip6.arpa
-      mux: false
-      allowInsecure: true
-    client-fingerprint: chrome
-
-  - name: SG-ss 3
-    type: ss
-    server: cf.090227.xyz
-    port: 443
-    cipher: none
-    password: c935bb27-c39a-4fce-9f3d-912215a948f7
-    plugin: v2ray-plugin
-    plugin-opts:
-      mode: websocket
-      host: jd.a.5.7.e.f.f.0.4.2.0.0.0.7.4.0.1.0.0.2.ip6.arpa
-      path: /c935bb27-c39a-4fce-9f3d-912215a948f7/?ed=2560
-      tls: true
-      peer: jd.a.5.7.e.f.f.0.4.2.0.0.0.7.4.0.1.0.0.2.ip6.arpa
-      mux: false
-      allowInsecure: true
-    client-fingerprint: chrome
-
-  - name: HK-ss 2
-    type: ss
-    server: cf.877774.xyz
-    port: 443
-    cipher: none
-    password: c935bb27-c39a-4fce-9f3d-912215a948f7
-    plugin: v2ray-plugin
-    plugin-opts:
-      mode: websocket
-      host: jd.a.5.7.e.f.f.0.4.2.0.0.0.7.4.0.1.0.0.2.ip6.arpa
-      path: /c935bb27-c39a-4fce-9f3d-912215a948f7/?ed=2560
-      tls: true
-      peer: jd.a.5.7.e.f.f.0.4.2.0.0.0.7.4.0.1.0.0.2.ip6.arpa
-      mux: false
-      allowInsecure: true
-    client-fingerprint: chrome
-
-  - name: JP-ss 2
-    type: ss
-    server: cdns.doon.eu.org
-    port: 443
-    cipher: none
-    password: c935bb27-c39a-4fce-9f3d-912215a948f7
-    plugin: v2ray-plugin
-    plugin-opts:
-      mode: websocket
-      host: jd.a.5.7.e.f.f.0.4.2.0.0.0.7.4.0.1.0.0.2.ip6.arpa
-      path: /c935bb27-c39a-4fce-9f3d-912215a948f7/?ed=2560
-      tls: true
-      peer: jd.a.5.7.e.f.f.0.4.2.0.0.0.7.4.0.1.0.0.2.ip6.arpa
-      mux: false
-      allowInsecure: true
-    client-fingerprint: chrome
-
-  - name: TW-ss
-    type: ss
-    server: sub.danfeng.eu.org
-    port: 443
-    cipher: none
-    password: c935bb27-c39a-4fce-9f3d-912215a948f7
-    plugin: v2ray-plugin
-    plugin-opts:
-      mode: websocket
-      host: jd.a.5.7.e.f.f.0.4.2.0.0.0.7.4.0.1.0.0.2.ip6.arpa
-      path: /c935bb27-c39a-4fce-9f3d-912215a948f7/?ed=2560
-      tls: true
-      peer: jd.a.5.7.e.f.f.0.4.2.0.0.0.7.4.0.1.0.0.2.ip6.arpa
-      mux: false
-      allowInsecure: true
-    client-fingerprint: chrome
-
-  - name: HK-ss 3
-    type: ss
-    server: cf.zhetengsha.eu.org
-    port: 443
-    cipher: none
-    password: c935bb27-c39a-4fce-9f3d-912215a948f7
-    plugin: v2ray-plugin
-    plugin-opts:
-      mode: websocket
-      host: jd.a.5.7.e.f.f.0.4.2.0.0.0.7.4.0.1.0.0.2.ip6.arpa
-      path: /c935bb27-c39a-4fce-9f3d-912215a948f7/?ed=2560
-      tls: true
-      peer: jd.a.5.7.e.f.f.0.4.2.0.0.0.7.4.0.1.0.0.2.ip6.arpa
-      mux: false
-      allowInsecure: true
-    client-fingerprint: chrome
-
-# ---------------------------------------------------------
-# 3. 策略组 (Proxy Groups)
+# 2. 策略组 (已修改为正则匹配)
+# 注意：这里移除了具体的 proxies 列表，改用正则表达式抓取你订阅里的节点
 # ---------------------------------------------------------
 proxy-groups:
   - name: 手动切换
@@ -216,16 +26,7 @@ proxy-groups:
       - 自动选择
       - 故障转移
       - DIRECT
-      - SG-ss
-      - JP-ss
-      - SG-ss 2
-      - KR-ss
-      - HK-ss
-      - SG-ss 3
-      - HK-ss 2
-      - JP-ss 2
-      - TW-ss
-      - HK-ss 3
+      - /.+/  # 正则表达式：抓取所有节点
 
   - name: 自动选择
     type: url-test
@@ -234,16 +35,7 @@ proxy-groups:
     interval: 300
     tolerance: 50
     proxies:
-      - SG-ss
-      - JP-ss
-      - SG-ss 2
-      - KR-ss
-      - HK-ss
-      - SG-ss 3
-      - HK-ss 2
-      - JP-ss 2
-      - TW-ss
-      - HK-ss 3
+      - /^(?!.*(Direct|Traffic|Expire|GB|G|Traffic|Time|Date|Website)).*/ # 排除无效节点的正则
 
   - name: 故障转移
     type: fallback
@@ -251,16 +43,7 @@ proxy-groups:
     url: 'http://cp.cloudflare.com/generate_204'
     interval: 300
     proxies:
-      - SG-ss
-      - JP-ss
-      - SG-ss 2
-      - KR-ss
-      - HK-ss
-      - SG-ss 3
-      - HK-ss 2
-      - JP-ss 2
-      - TW-ss
-      - HK-ss 3
+      - /^(?!.*(Direct|Traffic|Expire|GB|G|Traffic|Time|Date|Website)).*/
 
   - name: 国外网站
     type: select
@@ -268,85 +51,77 @@ proxy-groups:
     proxies:
       - 手动切换
       - 自动选择
-      - 故障转移
       - 香港节点
       - 日本节点
       - 美国节点
       - 台湾节点
       - DIRECT
 
+  # --- 地区分组 (根据你订阅节点的命名习惯抓取) ---
   - name: 香港节点
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Hong_Kong.png
     proxies:
-      - HK-ss
-      - HK-ss 2
-      - HK-ss 3
       - 自动选择
+      - /(HK|Hong|Kong|香港|HKG)/i  # 自动抓取名字含香港的节点
 
   - name: 日本节点
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Japan.png
     proxies:
-      - JP-ss
-      - JP-ss 2
       - 自动选择
+      - /(JP|Japan|Tokyo|Osaka|日本|东京)/i
 
   - name: 美国节点
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/United_States.png
     proxies:
       - 自动选择
-      - DIRECT
+      - /(US|USA|United|America|美国)/i
 
   - name: 台湾节点
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Taiwan.png
     proxies:
-      - TW-ss
       - 自动选择
+      - /(TW|Taiwan|Tai|Taipei|台湾|台北)/i
 
+  # --- 场景分组 ---
   - name: YouTube
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/YouTube.png
     proxies:
+      - 国外网站
       - 手动切换
       - 自动选择
-      - 故障转移
       - 香港节点
       - 日本节点
       - 美国节点
       - 台湾节点
-      - DIRECT
 
   - name: NETFLIX
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Netflix.png
     proxies:
+      - 国外网站
       - 手动切换
       - 自动选择
-      - 故障转移
       - 香港节点
       - 日本节点
       - 美国节点
       - 台湾节点
-      - DIRECT
 
   - name: 漏网之鱼
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Final.png
     proxies:
+      - 国外网站
       - 手动切换
       - 自动选择
-      - 故障转移
-      - 香港节点
-      - 日本节点
-      - 美国节点
-      - 台湾节点
       - DIRECT
 
 # ---------------------------------------------------------
-# 4. 规则集 (Rule Providers) 
+# 3. 规则集 (保持不变)
 # ---------------------------------------------------------
 rule-providers:
   YouTube:
@@ -377,7 +152,7 @@ rule-providers:
     interval: 86400
 
 # ---------------------------------------------------------
-# 5. 规则 (Rules)
+# 4. 规则匹配
 # ---------------------------------------------------------
 rules:
   - RULE-SET,YouTube,YouTube
