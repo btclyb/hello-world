@@ -1,32 +1,20 @@
-name: "Stash 规则分组优化"
-desc: "仅覆盖规则和策略组，自动抓取原有节点"
+name: "Stash 分组优化 (Fix)"
+desc: "修复正则匹配错误，自动抓取节点"
 
 # ---------------------------------------------------------
-# 1. 覆盖基础设置 (可选，不需要可删除)
-# ---------------------------------------------------------
-dns:
-  enable: true
-  ipv6: true
-  listen: 0.0.0.0:53
-  enhanced-mode: fake-ip
-  fake-ip-range: 198.18.0.1/16
-  default-nameserver: [223.5.5.5, 119.29.29.29]
-  nameserver: [https://doh.pub/dns-query, https://dns.alidns.com/dns-query]
-  fallback: [https://1.1.1.1/dns-query, https://8.8.8.8/dns-query]
-
-# ---------------------------------------------------------
-# 2. 策略组 (已修改为正则匹配)
-# 注意：这里移除了具体的 proxies 列表，改用正则表达式抓取你订阅里的节点
+# 1. 策略组 (已修正语法)
 # ---------------------------------------------------------
 proxy-groups:
   - name: 手动切换
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Rocket.png
+    # 开启 include-all 会抓取所有订阅节点
+    include-all: true
     proxies:
       - 自动选择
       - 故障转移
       - DIRECT
-      - /.+/  # 正则表达式：抓取所有节点
+    # 这里不需要 filter，因为手动切换通常想看到所有节点
 
   - name: 自动选择
     type: url-test
@@ -34,16 +22,17 @@ proxy-groups:
     url: "http://cp.cloudflare.com/generate_204"
     interval: 300
     tolerance: 50
-    proxies:
-      - /^(?!.*(Direct|Traffic|Expire|GB|G|Traffic|Time|Date|Website)).*/ # 排除无效节点的正则
+    include-all: true
+    # 排除无效节点、流量提示节点等
+    filter: "^(?!.*(Direct|Traffic|Expire|GB|G|Time|Date|Website|官网|流量|到期)).*"
 
   - name: 故障转移
     type: fallback
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Bypass.png
     url: 'http://cp.cloudflare.com/generate_204'
     interval: 300
-    proxies:
-      - /^(?!.*(Direct|Traffic|Expire|GB|G|Traffic|Time|Date|Website)).*/
+    include-all: true
+    filter: "^(?!.*(Direct|Traffic|Expire|GB|G|Time|Date|Website|官网|流量|到期)).*"
 
   - name: 国外网站
     type: select
@@ -57,34 +46,38 @@ proxy-groups:
       - 台湾节点
       - DIRECT
 
-  # --- 地区分组 (根据你订阅节点的命名习惯抓取) ---
+  # --- 地区分组 (使用 filter 抓取) ---
   - name: 香港节点
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Hong_Kong.png
     proxies:
       - 自动选择
-      - /(HK|Hong|Kong|香港|HKG)/i  # 自动抓取名字含香港的节点
+    include-all: true
+    filter: "(?i)(HK|Hong|Kong|香港|HKG)"
 
   - name: 日本节点
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Japan.png
     proxies:
       - 自动选择
-      - /(JP|Japan|Tokyo|Osaka|日本|东京)/i
+    include-all: true
+    filter: "(?i)(JP|Japan|Tokyo|Osaka|日本|东京)"
 
   - name: 美国节点
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/United_States.png
     proxies:
       - 自动选择
-      - /(US|USA|United|America|美国)/i
+    include-all: true
+    filter: "(?i)(US|USA|United|America|美国)"
 
   - name: 台湾节点
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Taiwan.png
     proxies:
       - 自动选择
-      - /(TW|Taiwan|Tai|Taipei|台湾|台北)/i
+    include-all: true
+    filter: "(?i)(TW|Taiwan|Tai|Taipei|台湾|台北)"
 
   # --- 场景分组 ---
   - name: YouTube
@@ -121,7 +114,7 @@ proxy-groups:
       - DIRECT
 
 # ---------------------------------------------------------
-# 3. 规则集 (保持不变)
+# 2. 规则集 (保持不变)
 # ---------------------------------------------------------
 rule-providers:
   YouTube:
@@ -152,7 +145,7 @@ rule-providers:
     interval: 86400
 
 # ---------------------------------------------------------
-# 4. 规则匹配
+# 3. 规则 (保持不变)
 # ---------------------------------------------------------
 rules:
   - RULE-SET,YouTube,YouTube
